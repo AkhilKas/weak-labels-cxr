@@ -1,5 +1,5 @@
 # Data
-data/CheXpert-v1.0-small/
+data/archive/
 data/processed/
 data/*.zip
 
