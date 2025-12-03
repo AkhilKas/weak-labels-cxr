@@ -1,0 +1,22 @@
+# Data
+data/CheXpert-v1.0-small/
+data/processed/
+data/*.zip
+
+# Outputs
+outputs/
+*.ckpt
+*.pth
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
