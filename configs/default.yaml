@@ -9,7 +9,7 @@ data:
 
 # Labels
 labels:
-  uncertainty_strategy: "zeros"  # zeros, ones, ignore, soft
+  uncertainty_strategy: "zeros"
 
 # Model
 model:
@@ -23,6 +23,7 @@ training:
   epochs: 10
   learning_rate: 0.0001
   weight_decay: 0.00001
+  patience: 3
 
 # Logging
 logging:

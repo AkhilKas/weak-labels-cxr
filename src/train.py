@@ -13,7 +13,7 @@ import wandb
 
 from src.dataset import CheXpertDataset, get_transforms, LABELS
 from src.model import CheXpertModel, get_loss_fn
-from src.utils import set_seed, get_device, AverageMeter
+from src.utils import set_seed, get_device, AverageMeter, EarlyStopping
 from src.evaluate import evaluate
 
 
@@ -76,19 +76,21 @@ def train(config: dict):
         frontal_only=True,
     )
     
+    pin_memory = device.type == "cuda"
+    
     train_loader = DataLoader(
         train_dataset,
         batch_size=config["training"]["batch_size"],
         shuffle=True,
         num_workers=config["data"]["num_workers"],
-        pin_memory=True,
+        pin_memory=pin_memory,
     )
     valid_loader = DataLoader(
         valid_dataset,
         batch_size=config["training"]["batch_size"],
         shuffle=False,
         num_workers=config["data"]["num_workers"],
-        pin_memory=True,
+        pin_memory=pin_memory,
     )
     
     print(f"Train samples: {len(train_dataset)}")
@@ -114,6 +116,12 @@ def train(config: dict):
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer,
         T_max=config["training"]["epochs"],
+    )
+    
+    # Early stopping
+    early_stopping = EarlyStopping(
+        patience=config["training"].get("patience", 3),
+        mode="max",
     )
     
     # Wandb
@@ -158,6 +166,11 @@ def train(config: dict):
                 output_dir / "best_model.pth",
             )
             print(f"  New best model saved (AUC: {best_auc:.4f})")
+        
+        # Early stopping check
+        if early_stopping(metrics["mean_auc"]):
+            print(f"Early stopping triggered at epoch {epoch}")
+            break
     
     # Save final model
     torch.save(
